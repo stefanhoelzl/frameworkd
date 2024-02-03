@@ -1,0 +1,8 @@
+{
+  "name": "FrameworkCtl",
+  "description": "Controls Framework Laptops.",
+  "uuid": "frameworkctl@stefanhoelzl",
+  "shell-version": [
+    "45"
+  ]
+}
