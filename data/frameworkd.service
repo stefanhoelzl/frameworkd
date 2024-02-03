@@ -1,0 +1,9 @@
+[Unit]
+Description=frameworkd
+Before=multi-user.target
+
+[Service]
+Type=dbus
+BusName=org.stefanhoelzl.frameworkd
+ExecStart=
+Restart=on-failure
