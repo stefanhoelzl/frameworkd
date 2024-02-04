@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .build()
         .await?;
 
-    println!("service running...");
+    println!("frameworkd started");
     pending::<()>().await;
     Ok(())
 }
