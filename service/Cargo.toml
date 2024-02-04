@@ -2,10 +2,34 @@
 name = "frameworkd"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+authors = ["Stefan Hoelzl"]
+description = "controls for framework laptops"
 
 [dependencies]
 framework_lib = { git = "https://github.com/FrameworkComputer/framework-system.git" }
 tokio = { version = "*", features = ["macros", "rt"]}
 zbus = "*"
+
+[profile.release]
+strip = true
+
+# RPM-Package
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/frameworkd", dest = "/usr/bin/", mode = "0755" },
+    { source = "../data/org.stefanhoelzl.frameworkd.conf", dest = "/usr/share/dbus-1/system.d/", mode = "0644" },
+    { source = "../data/org.stefanhoelzl.frameworkd.service", dest = "/usr/share/dbus-1/system-services/", mode = "644" },
+]
+
+[package.metadata.generate-rpm.requires]
+dbus = "*"
+
+# DEB-Package
+[package.metadata.deb]
+depends = ["dbus"]
+assets = [
+    ["target/release/frameworkd", "/usr/bin/", "0755" ],
+    ["../data/org.stefanhoelzl.frameworkd.conf", "/usr/share/dbus-1/system.d/", "0644" ],
+    ["../data/org.stefanhoelzl.frameworkd.service", "/usr/share/dbus-1/system-services/", "644" ],
+]

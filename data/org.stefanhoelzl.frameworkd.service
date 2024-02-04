@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.stefanhoelzl.frameworkd
+Exec=/usr/bin/frameworkd
+User=root
