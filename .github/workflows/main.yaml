@@ -1,0 +1,49 @@
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo apt-get install -y libudev-dev
+      - name: build frameworkd
+        run: |
+          cargo install cargo-generate-rpm cargo-deb
+          cargo build --release
+          cargo generate-rpm
+          cargo deb
+        working-directory: service
+      - name: package gnome-shell extension
+        run: |
+          UUID=`cat gnome-extension/metadata.json | jq --raw-output .uuid`
+          echo "gnome_extension_path=${UUID}.shell-extension-zip" >> "$GITHUB_ENV"
+          (cd gnome-extension; zip --filesync --recurse-paths ../${{ env.gnome_extension_path }} .)
+
+      # upload artifacts
+      - name: set package names
+        run: |
+          echo "rpm_path=`ls service/target/generate-rpm/*.rpm`" >> "$GITHUB_ENV"
+          echo "rpm_name=`echo $rpm_path | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
+          
+          echo "deb_path=`ls service/target/debian/*.deb`" >> "$GITHUB_ENV"
+          echo "deb_name=`echo $deb_path | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
+      - name: Upload frameworkd
+        uses: actions/upload-artifact@v4
+        with:
+          name: frameworkd
+          path: service/target/release/frameworkd
+      - name: Upload rpm
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.rpm_name }}
+          path: ${{ env.rpm_path }}
+      - name: Upload deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.deb_name }}
+          path: ${{ env.deb_path }}
+      - name: Upload gnome shell extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.gnome_extension_path }}
+          path: ${{ env.gnome_extension_path }}
