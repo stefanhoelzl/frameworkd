@@ -4,7 +4,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: sudo apt-get install -y libudev-dev
       - name: build frameworkd
         run: |
@@ -14,19 +14,23 @@ jobs:
           cargo deb
         working-directory: service
       - name: package gnome-shell extension
-        run: |
-          UUID=`cat gnome-extension/metadata.json | jq --raw-output .uuid`
-          echo "gnome_extension_path=${UUID}.shell-extension-zip" >> "$GITHUB_ENV"
-          (cd gnome-extension; zip --filesync --recurse-paths ../${{ env.gnome_extension_path }} .)
+        run: zip --filesync --recurse-paths ../`cat metadata.json | jq --raw-output .uuid`.shell-extension-zip .
+        working-directory: gnome-extension
 
       # upload artifacts
       - name: set package names
         run: |
-          echo "rpm_path=`ls service/target/generate-rpm/*.rpm`" >> "$GITHUB_ENV"
-          echo "rpm_name=`echo $rpm_path | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
+          RPM_PATH=`ls service/target/generate-rpm/*.rpm`
+          echo "rpm_path=$RPM_PATH" >> "$GITHUB_ENV"
+          echo "rpm_name=`echo $RPM_PATH | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
           
-          echo "deb_path=`ls service/target/debian/*.deb`" >> "$GITHUB_ENV"
-          echo "deb_name=`echo $deb_path | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
+          DEB_PATH=`ls service/target/debian/*.deb`
+          echo "deb_path=$DEB_PATH" >> "$GITHUB_ENV"
+          echo "deb_name=`echo $DEB_PATH | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
+          
+          GNOME_EXTENSION_PATH=`ls *.shell-extension-zip`
+          echo "gnome_extension_path=$GNOME_EXTENSION_PATH" >> "$GITHUB_ENV"
+          echo "gnome_extension_name=$GNOME_EXTENSION_PATH" >> "$GITHUB_ENV"
       - name: Upload frameworkd
         uses: actions/upload-artifact@v4
         with:
@@ -45,5 +49,5 @@ jobs:
       - name: Upload gnome shell extension
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.gnome_extension_path }}
+          name: ${{ env.gnome_extension_name }}
           path: ${{ env.gnome_extension_path }}
