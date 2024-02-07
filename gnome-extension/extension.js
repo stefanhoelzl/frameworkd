@@ -123,7 +123,7 @@ export default class FrameworkCtlExtension extends Extension {
             "Fprint Brightness",
             this.path + "/icons/fingerprint-symbolic.svg",
             (level) => ctl.set_fp_brightness_level(level),
-            { "50%": 3, "40%": 2, "15%": 0 },
+            { "55%": 3, "40%": 2, "15%": 0 },
 
         )
         const kbBrightnessMenu = SubMenu.create(
