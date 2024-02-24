@@ -12,7 +12,7 @@ Features:
 ![How it works](howitworks.gif)
 
 ## Requirements
-__AMD__: a kernel with [this patch series](https://patchwork.kernel.org/project/chrome-platform/list/?series=804326) is required.
+__AMD__: a kernel with [this patch series](https://patchwork.kernel.org/project/chrome-platform/list/?series=804326) is required or disable secure boot.
 
 ## Installation
 The latest binaries and packages can be found under the [actions artifacts](/https://github.com/stefanhoelzl/frameworkd/actions?query=branch%3Amain+is%3Asuccess).
