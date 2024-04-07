@@ -15,7 +15,7 @@ Features:
 __AMD__: a kernel with [this patch series](https://patchwork.kernel.org/project/chrome-platform/list/?series=840830) is required or disable secure boot.
 
 ## Installation
-The latest binaries and packages can be found under the [actions artifacts](https://github.com/stefanhoelzl/frameworkd/actions?query=branch%3Amain+is%3Asuccess).
+The latest binaries and packages can be found [here](https://stefanhoelzl.github.io/frameworkd).
 ```bash
 # Fedora
 $ dnf install frameworkd-0.1.0-1.x86_64.rpm

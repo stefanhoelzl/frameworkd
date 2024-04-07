@@ -1,21 +1,32 @@
 on: push
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   frameworkctl:
     runs-on: ubuntu-22.04
+    outputs:
+      extension-name: ${{ steps.metadata.outputs.extension-name }}
     steps:
       - uses: actions/checkout@v4
-      - name: set extension name
+      - id: metadata
         run: |
-          echo "gnome_extension_name=`cat gnome-extension/metadata.json | jq --raw-output .uuid`.shell-extension" >> "$GITHUB_ENV"
-      - name: Upload gnome shell extension
-        uses: actions/upload-artifact@v4
+          echo "extension-name=`cat gnome-extension/metadata.json | jq --raw-output .uuid`.shell-extension" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.gnome_extension_name }}
+          name: ${{ steps.metadata.outputs.extension-name }}
           path: gnome-extension
 
   frameworkd:
     runs-on: ubuntu-22.04
+    outputs:
+      bin-name: ${{ steps.metadata.outputs.bin-name }}
+      rpm-name: ${{ steps.metadata.outputs.rpm-name }}
+      deb-name: ${{ steps.metadata.outputs.deb-name }}
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get install -y libudev-dev
@@ -26,27 +37,91 @@ jobs:
           cargo generate-rpm
           cargo deb
         working-directory: service
-      - name: extract package names
+      - name: set metadata
+        id: metadata
         run: |
+          BIN_PATH=service/target/release/frameworkd
+          echo "bin_path=$BIN_PATH" >> "$GITHUB_ENV"
+          echo "bin-name=`basename $BIN_PATH`" >> "$GITHUB_OUTPUT"
+          
           RPM_PATH=`ls service/target/generate-rpm/*.rpm`
           echo "rpm_path=$RPM_PATH" >> "$GITHUB_ENV"
-          echo "rpm_name=`basename $RPM_PATH`" >> "$GITHUB_ENV"
+          echo "rpm-name=`basename $RPM_PATH`" >> "$GITHUB_OUTPUT"
           
           DEB_PATH=`ls service/target/debian/*.deb`
           echo "deb_path=$DEB_PATH" >> "$GITHUB_ENV"
-          echo "deb_name=`basename $DEB_PATH`" >> "$GITHUB_ENV"
+          echo "deb-name=`basename $DEB_PATH`" >> "$GITHUB_OUTPUT"
       - name: Upload frameworkd
         uses: actions/upload-artifact@v4
         with:
-          name: frameworkd
-          path: service/target/release/frameworkd
+          name: ${{ steps.metadata.outputs.bin-name }}
+          path: ${{ env.bin_path }}
       - name: Upload rpm
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.rpm_name }}
+          name: ${{ steps.metadata.outputs.rpm-name }}
           path: ${{ env.rpm_path }}
       - name: Upload deb
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.deb_name }}
+          name: ${{ steps.metadata.outputs.deb-name }}
           path: ${{ env.deb_path }}
+
+  prepare-deployment:
+    needs: [frameworkd, frameworkctl]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.frameworkd.outputs.bin-name }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.frameworkd.outputs.deb-name }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.frameworkd.outputs.rpm-name }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.frameworkctl.outputs.extension-name }}
+          path: tmp-gnome-extension
+      - run: zip --filesync --recurse-paths ../${{ needs.frameworkctl.outputs.extension-name }}.zip .
+        working-directory: tmp-gnome-extension
+      - run: rm -rf tmp-*
+      - name: generate index.html
+        run: |
+          tree \
+            -H . \
+            -T frameworkd \
+            --dirsfirst \
+            -h \
+            -D \
+            --timefmt="%Y-%m-%d %H:%M:%S" \
+            -I index.html \
+            -o index.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pages
+          path: "."
+
+  deploy:
+    if: github.ref_protected
+    needs: [prepare-deployment]
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pages
+          path: "."
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
