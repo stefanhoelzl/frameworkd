@@ -13,9 +13,6 @@ jobs:
           cargo generate-rpm
           cargo deb
         working-directory: service
-      - name: package gnome-shell extension
-        run: zip --filesync --recurse-paths ../`cat metadata.json | jq --raw-output .uuid`.shell-extension-zip .
-        working-directory: gnome-extension
 
       # upload artifacts
       - name: set package names
@@ -28,9 +25,7 @@ jobs:
           echo "deb_path=$DEB_PATH" >> "$GITHUB_ENV"
           echo "deb_name=`basename $DEB_PATH`" >> "$GITHUB_ENV"
           
-          GNOME_EXTENSION_PATH=`ls *.shell-extension-zip`
-          echo "gnome_extension_path=$GNOME_EXTENSION_PATH" >> "$GITHUB_ENV"
-          echo "gnome_extension_name=$GNOME_EXTENSION_PATH" >> "$GITHUB_ENV"
+          echo "gnome_extension_name=`cat gnome-extension/metadata.json | jq --raw-output .uuid`.shell-extension" >> "$GITHUB_ENV"
       - name: Upload frameworkd
         uses: actions/upload-artifact@v4
         with:
@@ -50,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.gnome_extension_name }}
-          path: ${{ env.gnome_extension_path }}
+          path: gnome-extension
