@@ -22,11 +22,11 @@ jobs:
         run: |
           RPM_PATH=`ls service/target/generate-rpm/*.rpm`
           echo "rpm_path=$RPM_PATH" >> "$GITHUB_ENV"
-          echo "rpm_name=`echo $RPM_PATH | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
+          echo "rpm_name=`basename $RPM_PATH`" >> "$GITHUB_ENV"
           
           DEB_PATH=`ls service/target/debian/*.deb`
           echo "deb_path=$DEB_PATH" >> "$GITHUB_ENV"
-          echo "deb_name=`echo $DEB_PATH | rev | cut --delimiter="/" --field=1 | rev`" >> "$GITHUB_ENV"
+          echo "deb_name=`basename $DEB_PATH`" >> "$GITHUB_ENV"
           
           GNOME_EXTENSION_PATH=`ls *.shell-extension-zip`
           echo "gnome_extension_path=$GNOME_EXTENSION_PATH" >> "$GITHUB_ENV"
