@@ -1,7 +1,9 @@
 use std::{error::Error, future::pending};
+use std::panic;
+
 use framework_lib::chromium_ec::commands::FpLedBrightnessLevel;
-use zbus::{ConnectionBuilder, dbus_interface};
 use framework_lib::chromium_ec::{CrosEc, CrosEcDriverType};
+use zbus::{ConnectionBuilder, dbus_interface};
 
 struct Battery {
     cros_ec: CrosEc
@@ -54,8 +56,12 @@ impl KeyboadBacklight {
 fn autoselect_cros_ec() -> Result<CrosEc, &'static str> {
     for driver in vec![CrosEcDriverType::CrosEc, CrosEcDriverType::Portio] {
         if let Some(cros_ec) = CrosEc::with(driver) {
-            if cros_ec.version_info().is_ok() {
-                return Ok(cros_ec);
+            if panic::catch_unwind(|| {
+                if cros_ec.version_info().is_err() {
+                    panic!("driver error")
+                }
+            }).is_ok() {
+                return Ok(cros_ec)
             }
         }
     }
