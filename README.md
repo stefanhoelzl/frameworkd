@@ -18,10 +18,13 @@ __AMD__: a kernel with [this patch series](https://patchwork.kernel.org/project/
 The latest binaries and packages can be found [here](https://stefanhoelzl.github.io/frameworkd).
 ```bash
 # Fedora
-$ dnf install frameworkd-0.1.0-1.x86_64.rpm
+$ dnf install frameworkd-0.2.0-1.x86_64.rpm
+
+# Fedora Atomic Desktop
+$ rpm-ostree install frameworkd-0.2.0-1.x86_64.rpm
 
 # Debian
-$ dpkg -i frameworkd_0.1.0-1_amd64.deb 
+$ dpkg -i frameworkd_0.2.0-1_amd64.deb 
 
 # Gnome Shell extension
 mkdir -p ~/.local/share/gnome-shell/extensions/frameworkctl@stefanhoelzl
