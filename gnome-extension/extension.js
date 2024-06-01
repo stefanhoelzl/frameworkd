@@ -123,8 +123,7 @@ export default class FrameworkCtlExtension extends Extension {
             "Fprint Brightness",
             this.path + "/icons/fingerprint-symbolic.svg",
             (level) => ctl.set_fp_brightness_level(level),
-            { "55%": 3, "40%": 2, "15%": 0 },
-
+            { "High": 3, "Medium": 2, "Low": 1 },
         )
         const kbBrightnessMenu = SubMenu.create(
             "Keyboard Backlight",
@@ -135,7 +134,10 @@ export default class FrameworkCtlExtension extends Extension {
 
         const refreshValues = () => {
             ctl.get_charge_limit().then(v => chargeLimitMenu.set_value(`${v}%`));
-            ctl.get_fp_brightness_level().then(v => fpBrightnessMenu.set_value(`${v}%`));
+            ctl.get_fp_brightness_level().then(v => {
+                const brightnessText = Object.keys(fpBrightnessMenu.get_items()).find(key => fpBrightnessMenu.get_items()[key] === v);
+                fpBrightnessMenu.set_value(brightnessText);
+            });
             ctl.get_kb_brightness().then(v => kbBrightnessMenu.set_value(v === 0 ? " Off" : `${v}%`))
         }
 
