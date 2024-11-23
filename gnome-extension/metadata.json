@@ -3,6 +3,6 @@
   "description": "Controls Framework Laptops.",
   "uuid": "frameworkctl@stefanhoelzl",
   "shell-version": [
-    "45", "46"
+    "45", "46", "47"
   ]
 }

@@ -56,8 +56,7 @@ $ busctl call org.stefanhoelzl.frameworkd /battery org.stefanhoelzl.framework.Ba
 ```
 
 ## Known Issues
-* GNOME extension supports only GNOME 45
-  * I can only test with version 45
+* GNOME extension supports only certain GNOME versions
   * If you have another version you can try to edit `~/.local/share/gnome-shell/extensions/frameworkctl@stefanhoelzl/metadata.json` and add your GNOME version before enabling the extension.
   * If it works on another GNOME version please let me know
 * settings are lost after reboot (see https://github.com/FrameworkComputer/framework-system/issues/25)
